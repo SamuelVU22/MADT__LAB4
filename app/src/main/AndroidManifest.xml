@@ -13,6 +13,9 @@
         android:theme="@style/Theme.MADT_LAB4"
         tools:targetApi="31">
         <activity
+            android:name=".DeleteNoteActivity"
+            android:exported="false" />
+        <activity
             android:name=".NoteEditorActivity"
             android:exported="false" />
         <activity

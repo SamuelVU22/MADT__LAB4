@@ -4,18 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -54,13 +50,12 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        
-        deleteNoteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-            }
+        deleteNoteButton.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, DeleteNoteActivity.class);
+            startActivity(intent);
         });
+
 
 
         sharedPreferences = this.getSharedPreferences("com.example.madt_lab4", Context.MODE_PRIVATE);
@@ -71,12 +66,18 @@ public class MainActivity extends AppCompatActivity {
         loadNotes(); // Load notes from SharedPreferences
         adapter = new ArrayAdapter<>(this, R.layout.custom_notes_row, R.id.notesTV, notes);
         notesListView.setAdapter(adapter);
-
+/*
         notesListView.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
-            intent.putExtra("noteId", position);
-            startActivity(intent);
+            if (position >= 0 && position < notes.size()) { // Ensure position is valid
+                Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
+                intent.putExtra("noteId", position);
+                startActivity(intent);
+            } else {
+                Toast.makeText(MainActivity.this, "Invalid selection", Toast.LENGTH_SHORT).show();
+            }
         });
+*/
+
     }
 
     private void loadNotes() {
