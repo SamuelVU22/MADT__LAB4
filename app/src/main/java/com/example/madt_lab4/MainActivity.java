@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,108 +22,84 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    ListView notesListView;
-    TextView emptyTv;
+    ListView notesListView; // ListView to display the notes
+    TextView emptyTv; // TextView to show a message when there are no notes
 
-    static List<String> notes = new ArrayList<>();
-    static ArrayAdapter<String> adapter;
+    static List<String> notes = new ArrayList<>(); // Static list to hold notes
+    static ArrayAdapter<String> adapter; // Adapter for the ListView
 
-    SharedPreferences sharedPreferences;
+    SharedPreferences sharedPreferences; // SharedPreferences to store notes
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        EdgeToEdge.enable(this); // Enable edge-to-edge display (full-screen)
+        setContentView(R.layout.activity_main); // Set the layout for this activity
+
+        // Apply insets for system bars (like status bar and navigation bar)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
+        // Initialize buttons for adding and deleting notes
         Button addNoteButton = findViewById(R.id.addNoteBTN);
         Button deleteNoteButton = findViewById(R.id.deleteNoteBTN);
 
+        // Set click listener for the add note button
         addNoteButton.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
-            startActivity(intent);
+            Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class); // Create intent to start NoteEditorActivity
+            startActivity(intent); // Start the NoteEditorActivity
         });
 
-
+        // Set click listener for the delete note button
         deleteNoteButton.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, DeleteNoteActivity.class);
-            startActivity(intent);
+            Intent intent = new Intent(MainActivity.this, DeleteNoteActivity.class); // Create intent to start DeleteNoteActivity
+            startActivity(intent); // Start the DeleteNoteActivity
         });
 
-
-
+        // Initialize SharedPreferences to store notes
         sharedPreferences = this.getSharedPreferences("com.example.madt_lab4", Context.MODE_PRIVATE);
 
-        notesListView = findViewById(R.id.noteList);
-        emptyTv = findViewById(R.id.emptyTV);
+        notesListView = findViewById(R.id.noteList); // Find the ListView in the layout
+        emptyTv = findViewById(R.id.emptyTV); // Find the TextView for empty state
 
-        loadNotes(); // Load notes from SharedPreferences
-        adapter = new ArrayAdapter<>(this, R.layout.custom_notes_row, R.id.notesTV, notes);
-        notesListView.setAdapter(adapter);
-/*
-        notesListView.setOnItemClickListener((parent, view, position, id) -> {
-            if (position >= 0 && position < notes.size()) { // Ensure position is valid
-                Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
-                intent.putExtra("noteId", position);
-                startActivity(intent);
-            } else {
-                Toast.makeText(MainActivity.this, "Invalid selection", Toast.LENGTH_SHORT).show();
-            }
-        });
-*/
-
+        loadNotes(); // Load notes from SharedPreferences into the list
+        adapter = new ArrayAdapter<>(this, R.layout.custom_notes_row, R.id.notesTV, notes); // Create an adapter for the ListView
+        notesListView.setAdapter(adapter); // Set the adapter to the ListView
     }
 
     private void loadNotes() {
+        // Retrieve stored notes from SharedPreferences as a HashSet
         HashSet<String> noteSet = (HashSet<String>) sharedPreferences.getStringSet("notes", new HashSet<>());
 
+        notes.clear(); // Clear existing notes from the list
+
         if (noteSet.isEmpty()) {
-            emptyTv.setVisibility(View.VISIBLE);
+            emptyTv.setVisibility(View.VISIBLE); // Show empty message if no notes are available
         } else {
-            emptyTv.setVisibility(View.GONE);
-            notes.clear();
-            notes.addAll(noteSet); // Load notes into the list
+            emptyTv.setVisibility(View.GONE); // Hide empty message if there are notes
+            notes.addAll(noteSet); // Load updated notes into the list from HashSet
         }
     }
 
     private void saveNotes() {
-        HashSet<String> noteSet = new HashSet<>(notes);
-        sharedPreferences.edit().putStringSet("notes", noteSet).apply();
+        HashSet<String> noteSet = new HashSet<>(notes); // Convert list of notes into a HashSet for storage
+        sharedPreferences.edit().putStringSet("notes", noteSet).apply(); // Save updated notes to SharedPreferences
     }
 
     private void updateNotesDisplay() {
-        adapter.notifyDataSetChanged(); // Notify adapter of data change
-        emptyTv.setVisibility(notes.isEmpty() ? View.VISIBLE : View.GONE); // Show/hide empty view
-    }
-/*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.add_note_menu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
+        adapter.notifyDataSetChanged(); // Notify adapter that data has changed (to refresh ListView)
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        super.onOptionsItemSelected(item);
-
-        if(item.getItemId() == R.id.add_note){
-            startActivity(new Intent(getApplicationContext(), NoteEditorActivity.class));
-            return true;
-        }
-        return false;
+        // Show or hide empty view based on whether there are any notes left
+        emptyTv.setVisibility(notes.isEmpty() ? View.VISIBLE : View.GONE);
     }
-    */
-
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadNotes(); // Reload notes when returning from NoteEditorActivity
+        loadNotes(); // Reload notes from SharedPreferences when returning to this activity
+        updateNotesDisplay(); // Update the display after loading new notes
     }
 }
